@@ -89,7 +89,7 @@ def main():
     # Manually encode json string to utf-8 encoding
     try:
         chr = __builtin__.__dict__.get("unichr")
-        str_json_dest_subbed = re.sub(r"\\u[0-9a-f]{4}", lambda x: chr(int("0x" + x.group(0)[2:], 16)), str_json_dest)
+        str_json_dest_subbed = re.sub(r"¥¥u[0-9a-f]{4}", lambda x: chr(int("0x" + x.group(0)[2:], 16)), str_json_dest)
     except KeyError:
         # do nothing if gettng unichr from the builtin dict failed    
         str_json_dest_subbed = str_json_dest
@@ -102,7 +102,7 @@ def main():
     cb[:] = None
 
     # Put neat json !
-    for line in str_json_org_encoded.split('\n'):
+    for line in str_json_org_encoded.split('¥n'):
         cb.append(line) 
 
 main()
