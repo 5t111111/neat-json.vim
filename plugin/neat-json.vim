@@ -1,7 +1,7 @@
-"if exists('g:loaded_neat_json')
-"  finish
-"endif
-"let g:loaded_neat_json = 1
+if exists('g:loaded_neat_json')
+  finish
+endif
+let g:loaded_neat_json = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -15,6 +15,7 @@ set cpo&vim
 function! s:NeatJson()
 
 python << EOF
+import vim
 import json
 import re
 import __builtin__
@@ -85,24 +86,23 @@ def main():
     
     # Encode json object to json string
     str_json_dest = json.dumps(obj_json, sort_keys=True, indent=4, separators=(',', ': '))
+    str_json_dest = str_json_dest.decode('utf-8')
     
-    # Manually encode json string to utf-8 encoding
-    try:
-        chr = __builtin__.__dict__.get("unichr")
-        str_json_dest_subbed = re.sub(r"¥¥u[0-9a-f]{4}", lambda x: chr(int("0x" + x.group(0)[2:], 16)), str_json_dest)
-    except KeyError:
-        # do nothing if gettng unichr from the builtin dict failed    
-        str_json_dest_subbed = str_json_dest
-    
-    # Convert back to the original encoding
-    str_json_dest_encoded = str_json_dest_subbed.encode(json_enc)
-    str_json_org_encoded = EncodingUtils.convert_encoding(str_json_dest_encoded, json_enc, org_enc)
-
     # Empty the current buffer
     cb[:] = None
 
+    try:
+        chr = __builtin__.__dict__.get("unichr")
+    except KeyError:
+        chr = None
+
     # Put neat json !
-    for line in str_json_org_encoded.split('¥n'):
+    for line in str_json_dest.split(u'\n'):
+        # Convert back to the original encoding
+        if not chr == None:
+            line = re.sub(r'\\u[0-9a-f]{4}', lambda x: chr(int(u'0x' + x.group(0)[2:], 16)), line)
+            line = line.encode(json_enc)
+            line = EncodingUtils.convert_encoding(line, json_enc, org_enc)
         cb.append(line) 
 
 main()
