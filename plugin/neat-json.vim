@@ -10,10 +10,8 @@ set cpo&vim
 "let g:path_to_this = expand("<sfile>:p:h")
 
 "-------------------------------------------------------
-" Python World
-"-------------------------------------------------------
 function! s:NeatJson()
-
+"-------------------------------------------------------
 python << EOF
 import vim
 import json
@@ -29,7 +27,7 @@ class EncodingUtils(object):
         """
         Guess the encoding of the data sepecified 
         """
-        codecs = ('ascii', 'shift_jis', 'euc_jp', 'utf_8', 'utf_16')
+        codecs = ('ascii', 'shift_jis', 'euc_jp', 'utf_8')
 
         f = lambda data, enc: data.decode(enc) and enc
     
@@ -57,36 +55,31 @@ def main():
 
     # Convert encoding to utf-8 at first
     org_enc = EncodingUtils.guess_encoding(''.join(cb))
-    if DEBUG:
-        print(org_enc)
     json_enc = 'utf_8'
 
-    def convert_enc(s):
-        s_conv = EncodingUtils.convert_encoding(s, org_enc, json_enc)
-        return s_conv
-
     # Decode to unicode for the following processes.
-    cb_converted = map(convert_enc, cb)
-    u_cb = map(lambda x: x.decode(json_enc), cb_converted)
+    buf_str = map(lambda s: EncodingUtils.convert_encoding(s, org_enc, json_enc), cb)
+    buf_str = map(lambda s: s.decode(json_enc), buf_str)
 
     # Clean up before decoding to json object
-    ustr_json_src_cleaned = u''
+    json_str = u''
     
-    for line in u_cb:
+    for line in buf_str:
         tokens = line.strip().split(u':')
-        tokens_stripped = map(lambda x: x.strip(), tokens)
-        line_stripped = u':'.join(tokens_stripped)
-        ustr_json_src_cleaned = ''.join([ustr_json_src_cleaned, line_stripped])
+        tokens = map(lambda x: x.strip(), tokens)
+        line = u':'.join(tokens)
+        json_str = ''.join([json_str, line])
         
     # Encode string to escaped unicode which json requires.
-    ustr_json_src_escaped = ustr_json_src_cleaned.encode("unicode-escape")
+    json_str = json_str.encode('unicode-escape')
     
     # Decode json string to object 
-    obj_json = json.loads(ustr_json_src_escaped)
+    json_obj = json.loads(json_str)
     
     # Encode json object to json string
-    str_json_dest = json.dumps(obj_json, sort_keys=True, indent=4, separators=(',', ': '))
-    str_json_dest = str_json_dest.decode('utf-8')
+
+    json_str = json.dumps(json_obj, sort_keys=True, indent=4, separators=(',', ': '))
+    json_str = json_str.decode(json_enc)
     
     # Empty the current buffer
     cb[:] = None
@@ -97,7 +90,7 @@ def main():
         chr = None
 
     # Put neat json !
-    for line in str_json_dest.split(u'\n'):
+    for line in json_str.split(u'\n'):
         # Convert back to the original encoding
         if not chr == None:
             line = re.sub(r'\\u[0-9a-f]{4}', lambda x: chr(int(u'0x' + x.group(0)[2:], 16)), line)
