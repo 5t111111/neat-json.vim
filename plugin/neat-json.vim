@@ -97,6 +97,9 @@ def main():
             line = line.encode(json_enc)
             line = EncodingUtils.convert_encoding(line, json_enc, org_enc)
         cb.append(line) 
+    
+    # delete unexpected empty line on the top of the buffer
+    cb[0] = None
 
 main()
 
