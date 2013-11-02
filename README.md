@@ -1,7 +1,7 @@
 neat-json.vim
 ============
 
-neat-json.vim is a plugin that enables you to indent the JSON on the current buffer prettily. 
+neat-json.vim is a plugin that enables you to indent the JSON on the current buffer prettily.   
 if_pyth is required as it is written in Python.
 
 Installation
