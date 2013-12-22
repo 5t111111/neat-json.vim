@@ -1,13 +1,8 @@
-if exists('g:loaded_neat_json')
-  finish
-endif
-let g:loaded_neat_json = 1
-
 let s:save_cpo = &cpo
 set cpo&vim
 
 function! s:LoadPythonModulePath()
-    for l:i in split(globpath(&runtimepath, "plugin/neat_json_lib"), '\n')
+    for l:i in split(globpath(&runtimepath, "neatjson_lib"), '\n')
         let s:python_module_path = fnamemodify(l:i, ":p")
     endfor
     python << EOF
@@ -18,7 +13,7 @@ site.addsitedir(vim.eval('s:python_module_path'))
 EOF
 endfunction
 
-function! s:NeatJson(arg)
+function! neatjson#NeatJson(arg)
 
     call s:LoadPythonModulePath()
 
@@ -87,9 +82,6 @@ main(vim.eval('a:arg'))
 
 EOF
 endfunction
-
-command! NeatJson call s:NeatJson('MODE_NORMAL')
-command! NeatRawJson call s:NeatJson('MODE_RAW')
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
